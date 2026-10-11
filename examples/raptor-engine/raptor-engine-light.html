@@ -113,6 +113,8 @@
 .iso-plate-corner[data-corner="title"],.iso-plate-corner[data-corner="hint"]{letter-spacing:.06em}
 .iso-plate-corner[data-corner="hint"]{bottom:17px}
 .iso-plate-corner[data-corner="readout"]{left:0;right:auto;letter-spacing:.02em}
+.iso-legend{gap:6px;margin-top:10px;font-size:12px;line-height:1.45}
+.iso-keys{gap:3px 14px}
 }
 @media (prefers-reduced-motion:reduce){.iso-line[data-flow],.iso-dots circle[data-pulse]{animation:none}}
 
@@ -419,6 +421,23 @@ body{margin:0;background:var(--anatomy-page);color:var(--anatomy-text);font:14px
     font-size: 9.5px;
     letter-spacing: 0.06em;
     line-height: 1.3;
+  }
+}
+
+@media (max-width: 560px) {
+  .rp-parts {
+    gap: 4px;
+    margin-bottom: 4px;
+  }
+
+  .rp-part {
+    gap: 5px;
+    padding: 3px 8px;
+    font-size: 11.5px;
+  }
+
+  .rp-num {
+    font-size: 9px;
   }
 }
 
