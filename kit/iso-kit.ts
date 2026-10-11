@@ -697,19 +697,20 @@ export interface PlateOptions {
   fig: string;
   title?: string;
   hint?: string;
+  touchHint?: string;
   readout?: string;
   keys?: LegendKey[];
   caption?: string;
   body: string;
 }
 
-export function plateHtml({ fig, title, hint, readout = "", keys = [], caption, body }: PlateOptions) {
-  const corner = (name: string, text: string, extra = "") => `<span class="iso-plate-corner" data-corner="${name}"${extra}>${escape(text)}</span>`;
+export function plateHtml({ fig, title, hint, touchHint, readout = "", keys = [], caption, body }: PlateOptions) {
+  const corner = (name: string, text: string, extra = "", inner?: string) => `<span class="iso-plate-corner" data-corner="${name}"${extra}>${inner ?? escape(text)}</span>`;
   const legend =
     keys.length || caption
       ? `<figcaption class="iso-legend">${keys.length ? `<span class="iso-keys">${keys.map((key) => `<span class="iso-key">${swatchSvg(key.mark)}${escape(key.label)}</span>`).join("")}</span>` : ""}${caption ? `<span class="iso-caption">${escape(caption)}</span>` : ""}</figcaption>`
       : "";
-  return `<figure class="iso-figure"><div class="iso-plate"><div class="iso-plate-corners" aria-hidden="true">${corner("fig", fig)}${title ? corner("title", title) : ""}${hint ? corner("hint", hint) : ""}${corner("readout", readout, " data-readout")}</div>${body}</div>${legend}</figure>`;
+  return `<figure class="iso-figure"><div class="iso-plate"><div class="iso-plate-corners" aria-hidden="true">${corner("fig", fig)}${title ? corner("title", title) : ""}${hint ? (touchHint ? corner("hint", "", "", `<span class="iso-hint-pointer">${escape(hint)}</span><span class="iso-hint-touch">${escape(touchHint)}</span>`) : corner("hint", hint)) : ""}${corner("readout", readout, " data-readout")}</div>${body}</div>${legend}</figure>`;
 }
 
 export interface PageOptions {
@@ -814,6 +815,7 @@ export const ISO_CSS = `
 @keyframes iso-pulse{0%,100%{opacity:.18}12%{opacity:1}40%{opacity:.18}}
 .iso-line[data-flow]{animation:iso-flow 1600ms linear infinite}
 .iso-dots circle[data-pulse]{animation:iso-pulse 1600ms steps(1,end) infinite;animation-delay:var(--pulse-at,0ms)}
+.iso-stage{touch-action:pan-y}
 .iso-figure{margin:32px 0 36px}
 .iso-plate{position:relative;padding:52px 24px;border-radius:0;background:var(--anatomy-card);box-shadow:0 0 0 1px var(--anatomy-mid);--anatomy-paper:var(--anatomy-card)}
 .iso-plate-corners{position:absolute;inset:18px 20px;pointer-events:none}
@@ -837,6 +839,15 @@ export const ISO_CSS = `
 .iso-swatch[data-mark="green"] path{stroke:var(--anatomy-green)}
 .iso-swatch[data-mark="blue"] path{stroke:var(--anatomy-blue)}
 .iso-swatch-crease{stroke:var(--anatomy-lo)!important}
-@media (max-width:560px){.iso-plate{padding:48px 12px 70px}.iso-plate-corner[data-corner="hint"]{bottom:18px}}
+.iso-hint-touch{display:none}
+@media (hover:none){.iso-hint-pointer{display:none}.iso-hint-touch{display:inline}}
+@media (max-width:560px){
+.iso-plate{padding:48px 12px 70px}
+.iso-plate-corners{inset:16px 14px}
+.iso-plate-corner{font-size:9.5px}
+.iso-plate-corner[data-corner="title"],.iso-plate-corner[data-corner="hint"]{letter-spacing:.06em}
+.iso-plate-corner[data-corner="hint"]{bottom:17px}
+.iso-plate-corner[data-corner="readout"]{left:0;right:auto;letter-spacing:.02em}
+}
 @media (prefers-reduced-motion:reduce){.iso-line[data-flow],.iso-dots circle[data-pulse]{animation:none}}
 `;
