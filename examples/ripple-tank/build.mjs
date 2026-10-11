@@ -539,6 +539,7 @@ const body = `<div class="rt">${k.plateHtml({
   fig: "Fig 3",
   title: "Ripple tank",
   hint: "Move across for f · up and down for spacing",
+  touchHint: "Tap to set f and spacing",
   readout: M.readoutOf(startState),
   keys: [
     { mark: "lit", label: "Two dippers, in phase: the sources" },

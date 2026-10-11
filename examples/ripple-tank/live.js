@@ -562,10 +562,6 @@ still.addEventListener("change", () => {
   run();
 });
 
-if (matchMedia("(hover: none)").matches) {
-  const hint = root.querySelector('[data-corner="hint"]');
-  if (hint) hint.textContent = "Tap to set f and spacing · drag across for f";
-}
 window.addEventListener("resize", () => {
   dirty = true;
   run();
