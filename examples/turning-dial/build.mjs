@@ -461,6 +461,7 @@ const body = k.plateHtml({
   fig: "Fig 3D",
   title: "Turning dial",
   hint: "Drag the dial · arrow keys · B breaks the pod",
+  touchHint: "Drag sideways to turn the dial",
   readout: "dial 0 · 0.0°",
   keys: [
     { mark: "raised", label: "The dial and the hand on it: one rigid group" },
