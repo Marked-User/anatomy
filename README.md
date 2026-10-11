@@ -1,9 +1,8 @@
 <h1 align="center">Anatomy</h1>
 
-<p align="center"><b>A Claude skill that explains an idea by building it as a real, working object.</b><br>Crafted, interactive isometric figures with many small precise parts, in SVG, WebGL and 3D.</p>
+<p align="center"><b>An Agent Skill that explains an idea by building it as a real, working object.</b><br>Crafted, interactive isometric figures with many small precise parts, in SVG, WebGL and 3D.</p>
 
 <p align="center">
-  <a href="https://code.claude.com/docs/en/skills"><img src="https://img.shields.io/badge/Claude_Code-skill-1b1b19?style=flat-square&logo=claude&logoColor=white" alt="Claude Code skill"></a>
   <a href="https://agentskills.io"><img src="https://img.shields.io/badge/Agent_Skills-compatible-1b1b19?style=flat-square" alt="Agent Skills compatible"></a>
   <a href="LICENSE"><img src="https://img.shields.io/badge/license-MIT-1b1b19?style=flat-square" alt="MIT license"></a>
   <a href="#requirements"><img src="https://img.shields.io/badge/node-%E2%89%A5%2020.10-1b1b19?style=flat-square&logo=nodedotjs&logoColor=white" alt="Node 20.10 or later"></a>
@@ -38,23 +37,23 @@
 
 ---
 
-Ask Claude for a figure that explains a technical idea, and Anatomy has it invent a physical thing whose working *is* the concept. A cache key that skips work when nothing changed becomes a pin-tumbler lock that only turns when every pin matches. One GPU context serving many canvases becomes a gantry plotter whose single print head visits 16 wells.
+Ask your coding agent for a figure that explains a technical idea, and Anatomy has it invent a physical thing whose working *is* the concept. A cache key that skips work when nothing changed becomes a pin-tumbler lock that only turns when every pin matches. One GPU context serving many canvases becomes a gantry plotter whose single print head visits 16 wells.
 
-Then Claude builds that thing out of dozens of small, solid, shaded parts, puts it in a framed card with a title, a hint and a live readout, makes it move calmly under the pointer and the keyboard, and checks its own work by zooming in on every joint. Every number the figure shows comes from the same small model that moves its parts.
+Then the agent builds that thing out of dozens of small, solid, shaded parts, puts it in a framed card with a title, a hint and a live readout, makes it move calmly under the pointer and the keyboard, and checks its own work by zooming in on every joint. Every number the figure shows comes from the same small model that moves its parts.
 
 ## Quick start
 
 ```sh
-npx skills add wheresryan22/anatomy -g -a claude-code
+npx skills add wheresryan22/anatomy -g
 ```
 
-Then, in Claude Code:
+The CLI asks which agents to set up. Then, in your agent:
 
 ```text
 /anatomy explain how a token bucket rate limiter works, interactive
 ```
 
-That's it. No API keys and nothing to `npm install`: the kit uses only Node's built-in modules.
+Agents without slash commands load it when you ask for an isometric explainer figure, or you can point them at `SKILL.md`. No API keys and nothing to `npm install`: the kit uses only Node's built-in modules. `node scripts/doctor.mjs` checks Node, Chrome and ffmpeg and says how to fix anything missing.
 
 ## Gallery
 
@@ -93,12 +92,12 @@ Each figure is light or dark. Light is the theme the skill designs for first, sh
 
 ## Install
 
-Anatomy is a standard [Agent Skill](https://code.claude.com/docs/en/skills): a folder with a `SKILL.md` at its root. This repository is that folder. Pick one way in:
+Anatomy is a standard [Agent Skill](https://agentskills.io): a folder with a `SKILL.md` at its root, so it works with any agent that reads skills, not only one vendor's. This repository is that folder. The paths below are Claude Code's; for another agent, use its skills folder instead (the skills CLI knows the common ones), or tell the agent to read `SKILL.md` from wherever you cloned it. Pick one way in:
 
 | | Command | Installs to |
 |---|---|---|
-| **skills CLI**, for you | `npx skills add wheresryan22/anatomy -g -a claude-code` | `~/.claude/skills/anatomy` |
-| **skills CLI**, for one project | `npx skills add wheresryan22/anatomy` | `.claude/skills/anatomy` |
+| **skills CLI**, for you | `npx skills add wheresryan22/anatomy -g` (add `-a <agent>` to pick one) | the chosen agent's user skills folder, for example `~/.claude/skills/anatomy` |
+| **skills CLI**, for one project | `npx skills add wheresryan22/anatomy` | the chosen agent's project skills folder, for example `.claude/skills/anatomy` |
 | **git**, for you | `git clone https://github.com/wheresryan22/anatomy.git ~/.claude/skills/anatomy` | `~/.claude/skills/anatomy` |
 | **git**, for one project | `git clone https://github.com/wheresryan22/anatomy.git .claude/skills/anatomy` | `.claude/skills/anatomy` |
 | **Download**, no git | see below | `~/.claude/skills/anatomy` |
@@ -108,7 +107,7 @@ Anatomy is a standard [Agent Skill](https://code.claude.com/docs/en/skills): a f
 
 <br>
 
-The [`skills`](https://github.com/vercel-labs/skills) CLI finds the `SKILL.md` at the root of this repository and installs it as `anatomy`. By default it installs into the current project and asks which agents to set up. `-g` installs it for your user, and `-a claude-code` sets up Claude Code only.
+The [`skills`](https://github.com/vercel-labs/skills) CLI finds the `SKILL.md` at the root of this repository and installs it as `anatomy`. By default it installs into the current project and asks which agents to set up. `-g` installs it for your user, and `-a <agent>` (for example `-a claude-code`) sets up one agent only.
 
 The CLI copies the whole repository, examples included (about 10 MB). It needs a recent Node.js: version 1.7.1 of the CLI asks for 22.20 or later.
 
@@ -119,7 +118,7 @@ The CLI copies the whole repository, examples included (about 10 MB). It needs a
 
 <br>
 
-Clone the repository into one of Claude Code's skill folders, so that `SKILL.md` ends up at `<skills folder>/anatomy/SKILL.md`. For a project install, commit `.claude/skills/anatomy` so your team gets it too. To update later, `git pull` inside that folder.
+Clone the repository into your agent's skills folder (for Claude Code, one of the two below), so that `SKILL.md` ends up at `<skills folder>/anatomy/SKILL.md`. For a project install, commit `.claude/skills/anatomy` so your team gets it too. To update later, `git pull` inside that folder.
 
 </details>
 
@@ -138,7 +137,7 @@ mkdir -p ~/.claude/skills/anatomy && curl -L https://github.com/wheresryan22/ana
 
 </details>
 
-Claude Code picks up new skills in a running session. If the `skills` folder itself did not exist when the session started, run `/reload-skills`.
+Claude Code picks up new skills in a running session; if its `skills` folder did not exist when the session started, run `/reload-skills`. Other agents differ: check how yours reloads skills.
 
 ## Usage
 
@@ -148,7 +147,7 @@ Type `/anatomy` and say what the figure should explain:
 /anatomy explain how a token bucket rate limiter works, interactive
 ```
 
-You don't have to name the skill. Claude also loads it when you ask for an isometric illustration, an explanatory figure for docs, a blog post or a landing page, or an interactive explainer.
+You don't have to name the skill. An agent also loads it when you ask for an isometric illustration, a mechanical or premium technical illustration, or an interactive explainer of how something works. It is meant not to load for charts, simple diagrams, thumbnails or social cards (see the negative cases in [`evals/evals.json`](evals/evals.json)).
 
 <details>
 <summary><b>More prompts</b>, from the skill's <a href="evals/evals.json">evals</a></summary>
@@ -188,6 +187,7 @@ Each framework-free example has a Node build script that writes standalone pages
 | Example | What it shows | Build |
 |---|---|---|
 | [`dial-indicator`](examples/dial-indicator) | A dial gauge on a stand over a carriage of gauge blocks. The smallest example, about 300 lines. | `node examples/dial-indicator/build.mjs` |
+| [`balance-ledger`](examples/balance-ledger) | Double-entry bookkeeping as a beam balance: each journal entry puts a weight on the debit pan and the credit pan, the beam tips while an entry is half posted and levels when debits equal credits. The readout is in dollars. A second small template. | `node examples/balance-ledger/build.mjs` |
 | [`desk-computer`](examples/desk-computer) | A 1984-style desk computer with a keyboard you can type on. The typed line appears on a CRT drawn in the plane of the case front, and switching it off collapses the picture to a line and a dot. About 85 solids. | `node examples/desk-computer/build.mjs` |
 | [`arcade-cabinet`](examples/arcade-cabinet) | An upright arcade cabinet with its side panel off. Drop a quarter: it rolls down the coin chute past the coin-switch wire into the cash box, a pulse runs along the cable to the board, and the CRT warms up into an attract mode drawn in the plane of the tilted monitor. About 240 solids and 15 cables. | `node examples/arcade-cabinet/build.mjs` |
 | [`raptor-engine`](examples/raptor-engine) | A Raptor 2 engine in a test stand. It comes apart into 11 assemblies, and a WebGL plume, shock, splash and steam render between the back and front SVG. The reference for dense pipework, smooth shading, fades and the audit. The build takes a few minutes. | `node examples/raptor-engine/build.mjs` |
@@ -200,10 +200,11 @@ Each framework-free example has a Node build script that writes standalone pages
 
 ## How it works
 
-- **[`SKILL.md`](SKILL.md)** is what Claude reads. It sets the workflow: collect the true numbers first, invent the object, write a parts list, plan the world, build the geometry once with the kit, paint back to front, frame it, make it live, and then verify it like a critic. It also holds the craft rules in short form.
+- **[`SKILL.md`](SKILL.md)** is what the agent reads (about 8 KB; the long guides load only when a figure needs them). It sets the workflow: collect the true numbers first, invent the object, write a parts list, plan the world, build the geometry once with the kit, paint back to front, frame it, make it live, and then verify it like a critic. It also holds the craft rules in short form, the size of each request in milestones, and two verification tiers.
 - **[`kit/`](kit)** is the drawing library the figures are built from: the isometric camera, solids and a parts library (`iso-kit`), round parts on any axis (`lathe.mjs`), pipes and cables (`tube.mjs`), the WebGL layer (`gl.mjs`), the 3D runtime (`turn*.mjs`), and React components (`react/`). Apart from React for those components, it has no dependencies.
-- **[`references/`](references)** are the long-form guides Claude opens when it needs them: craft, the kit API, motion, React, verification, WebGL, a design walkthrough and the 3D mode.
-- **Verification.** [`kit/audit.mjs`](kit/audit.mjs) proves the geometry: nothing passes through anything, every end sits on a mount, and every overlap is drawn in depth order (`node build.mjs --audit`). In headless Chrome, [`scripts/capture.mjs`](scripts/capture.mjs) and [`scripts/drive.mjs`](scripts/drive.mjs) take screenshots, close-ups and slowed-down contact sheets, [`scripts/lines.mjs`](scripts/lines.mjs) fails any line that ends in mid-air, and [`scripts/turn-check.mjs`](scripts/turn-check.mjs) checks 3D figures. The skill tells Claude to read every PNG it makes.
+- **[`references/`](references)** are the long-form guides the agent opens only when it needs them: craft, concepts, examples, the kit API, motion, pipes, React, verification, WebGL, a design walkthrough and the 3D mode.
+- **Verification.** [`kit/audit.mjs`](kit/audit.mjs) proves the geometry: nothing passes through anything, every end sits on a mount, and every overlap is drawn in depth order (`node build.mjs --audit`). In headless Chrome, [`scripts/capture.mjs`](scripts/capture.mjs) and [`scripts/drive.mjs`](scripts/drive.mjs) take screenshots, close-ups and slowed-down contact sheets, [`scripts/lines.mjs`](scripts/lines.mjs) fails any line that ends in mid-air, and [`scripts/turn-check.mjs`](scripts/turn-check.mjs) checks 3D figures. The skill tells the agent to read every PNG it makes. [`scripts/run-evals.mjs`](scripts/run-evals.mjs) builds every framework-free example and runs the capture, line check and audit on each, with a PNG per case.
+- **Export.** [`scripts/export.mjs`](scripts/export.mjs) turns a built page into a 1080 × 1080, 1600 × 900 or 1920 × 1080 PNG, a GIF or an MP4 (with ffmpeg), and writes the figure's alt text beside it.
 
 <details>
 <summary><b>Repository layout</b></summary>
@@ -212,7 +213,7 @@ Each framework-free example has a Node build script that writes standalone pages
 
 ```text
 anatomy/
-├── SKILL.md                  the skill: workflow, setup and craft rules
+├── SKILL.md                  the skill: workflow, milestones, tiers and craft rules in short
 ├── kit/                      the drawing library
 │   ├── iso-kit.ts            the core: camera, solids, parts, SVG renderer, card and page, CSS
 │   ├── iso-kit.mjs           the same core as plain ESM, for Node build scripts
@@ -227,18 +228,22 @@ anatomy/
 │   ├── turn-audit.mjs        the 3D orbit audit
 │   └── turn-fixed.mjs, canvas-painter.mjs, gl-shared.mjs
 │                             experimental variants, not yet documented or used by the examples
-├── references/               long-form guides Claude reads as needed
-│   ├── craft.md  kit.md  motion.md  react.md
-│   └── verify.md  webgl.md  walkthrough.md  3d.md
+├── references/               long-form guides the agent reads as needed
+│   ├── craft.md  concepts.md  examples.md  kit.md  motion.md
+│   └── pipes.md  react.md  verify.md  webgl.md  walkthrough.md  3d.md
 ├── scripts/                  headless Chrome checks and build helpers
-│   ├── capture.mjs           screenshots and close-ups
+│   ├── capture.mjs           screenshots, close-ups and the phone fit check
+│   ├── export.mjs            PNG, GIF and MP4 exports with alt text sidecars
+│   ├── doctor.mjs            checks Node, Chrome and ffmpeg
+│   ├── find-chrome.mjs       the shared Chrome lookup
+│   ├── run-evals.mjs         builds and checks every framework-free example
 │   ├── drive.mjs             scripted sessions and contact sheets
 │   ├── lines.mjs             the line-end check (with line-ends.mjs)
 │   ├── inline-kit.mjs        the kit as source, to inline into a standalone page
 │   ├── turn-check.mjs        3D checks in the browser (with turn-fidelity.mjs)
 │   └── turn-bench.mjs        3D timing in Node
-├── examples/                 eight complete figures, built pages committed
-├── evals/evals.json          test prompts and what a good answer contains
+├── examples/                 nine complete figures, built pages committed
+├── evals/evals.json          test prompts, what a good answer contains, and prompts that must not load the skill
 └── .github/                  issue forms, PR template, CI, README images
 ```
 
@@ -248,9 +253,10 @@ anatomy/
 
 | | Needed for | Notes |
 |---|---|---|
-| **[Claude Code](https://code.claude.com/docs/en/overview)** | everything | The skill is written for it. |
+| **An agent that reads Agent Skills** | everything | For example [Claude Code](https://code.claude.com/docs/en/overview). Any agent that can read `SKILL.md` and run Node works. |
 | **Node.js 20.10+** | builds, kit, checks | Built-in modules only: nothing to `npm install`. The examples were rebuilt byte for byte on Node 20.19 and 22.11. On Node 20 the browser scripts restart themselves with `--experimental-websocket`. |
-| **Chrome or Chromium** | the checks | `capture.mjs`, `drive.mjs`, `lines.mjs` and `turn-check.mjs` look in the usual places on macOS, Linux and Windows and in Playwright's cache. Set `CHROME_PATH` for any other binary. They run it headless with WebGL on. |
+| **Chrome or Chromium** | the checks | `capture.mjs`, `drive.mjs`, `lines.mjs` and `turn-check.mjs` look in the usual places on macOS, Linux and Windows and in Playwright's cache. Set `CHROME_PATH` for any other binary. They run it headless with WebGL on. `node scripts/doctor.mjs` shows what was found. |
+| **ffmpeg** | GIF and MP4 export only | Without it, `export.mjs` writes a PNG contact sheet instead. |
 | **React 18+** | React output only | `kit/react/`, `examples/test-rig/` and `examples/spot-plate/`. |
 
 ## Limits
@@ -274,5 +280,7 @@ Issues and pull requests are welcome. Read [CONTRIBUTING.md](CONTRIBUTING.md) fi
 ## License
 
 [MIT](LICENSE) © 2026 Ryan · [@wheresryan22](https://x.com/wheresryan22)
+
+Anatomy was created by Ryan ([@wheresryan22](https://github.com/wheresryan22)). This fork builds on the original under the same MIT license.
 
 <p align="center"><sub>If Anatomy drew something useful for you, a ⭐ helps other people find it.</sub></p>

@@ -30,6 +30,8 @@ Each framework-free example is one script that writes standalone pages next to i
 ```sh
 node examples/dial-indicator/build.mjs
 node examples/dial-indicator/build.mjs --light
+node examples/balance-ledger/build.mjs
+node examples/balance-ledger/build.mjs --light
 node examples/desk-computer/build.mjs
 node examples/desk-computer/build.mjs --light
 node examples/arcade-cabinet/build.mjs
@@ -51,6 +53,8 @@ After a build, `git status --short` must show nothing unless you meant to change
 ## The checks
 
 Run the ones that match what you touched, and read every PNG they write: open it and look. Put screenshots in `shots/`, which is ignored.
+
+**Prose lint.** For any change to SKILL.md, the references, the README or the scripts. `node scripts/lint-prose.mjs` fails on em dashes and on a vendor logo glyph in an example, and warns about human time estimates in planning prose and about a SKILL.md over its 9000 byte budget or missing its frontmatter. Add `--strict` to make warnings fail and `--json` for machine output. Pass files, folders or quoted globs to limit the scan.
 
 **Geometry audit.** For figures with pipes, cables or round parts. It must end `audit passed`, with every failing line at 0.
 
