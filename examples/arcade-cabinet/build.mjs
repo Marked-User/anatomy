@@ -695,6 +695,7 @@ const body =
     fig: "Fig 4",
     title: "Upright cabinet, side off",
     hint: "C or click the quarters · ← → · space",
+    touchHint: "Tap the quarters to add a coin",
     readout: "off · 0 credits",
     keys: [
       { mark: "lit", label: "The picture: drawn in the plane of the CRT behind the tilted glass" },
