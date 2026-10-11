@@ -153,7 +153,7 @@ function dial() {
   out.push(S(k.slabOf({ x: x + DIAL_R - 1, y: -2.4, w: 5, d: 4.8, r: 1.2 }, DIAL_Z + 2, 5, P, 3), { tone: "mid" }));
   out.push(S(k.slabOf({ x: x + DIAL_R + 3.6, y: -3.2, w: 2.6, d: 6.4, r: 1.2 }, DIAL_Z + 1.2, 6.6, P, 3), { tone: "mid" }));
   out.push(L(k.ring(x, y, 1.6, DIAL_TOP, P, 16), { tone: "mid" }));
-  out.push(k.faceTextSvg(k.topMatrix([x, y + 9], DIAL_TOP, P, "x"), "0.01", { size: 2.4, tone: "lo", anchor: "middle" }));
+  out.push(k.faceTextSvg(k.topMatrix([x, y + 9], DIAL_TOP, P, "x"), "0.4 mm", { size: 2.2, tone: "lo", anchor: "middle" }));
   return out.join("");
 }
 
@@ -168,7 +168,7 @@ const svg = k.figureSvg({
   width: WIDTH,
   height: HEIGHT,
   label:
-    "A dial indicator on a surface plate. A magnetic base holds a post and an arm; the arm carries a dial whose plunger rests on three gauge blocks, 18, 14 and 10 tall, on a carriage that slides along two rails. Wherever the carriage stops, the plunger rises to the block under it and the needle turns by the same amount.",
+    "A dial indicator on a surface plate. A magnetic base holds a post and an arm; the arm carries a dial whose plunger rests on three gauge blocks, 18, 14 and 10 mm tall, on a carriage that slides along two rails. Wherever the carriage stops, the plunger rises to the block under it and the needle turns by the same amount.",
   body: [
     plate(),
     rails(),
@@ -213,7 +213,7 @@ function draw() {
   plunger.setAttribute("transform", translateAlong(P, [0, 0, tip.at]));
   needle.setAttribute("d", needleAt((tip.at - BASE) / PER_TURN));
   const index = blockUnder(x);
-  const text = (index < 0 ? "between blocks" : "block " + (index + 1)) + " · reads " + (tip.at - BASE).toFixed(1) + " px";
+  const text = (index < 0 ? "between blocks" : "block " + (index + 1)) + " · reads " + (tip.at - BASE).toFixed(1) + " mm";
   if (readout.textContent !== text) readout.textContent = text;
   stage.setAttribute("aria-valuenow", String(Math.round(tip.at - BASE)));
   stage.setAttribute("aria-valuetext", text);
@@ -237,11 +237,13 @@ const run = () => { if (!frame && visible) { last = 0; frame = requestAnimationF
 const steer = (next) => { touring = false; target = clamp(next, REACH[0], REACH[1]); clearTimeout(idleTimer); idleTimer = setTimeout(() => { touring = !still.matches; clock = 0; run(); }, 3600); run(); };
 new IntersectionObserver((entries) => { visible = entries[entries.length - 1].isIntersecting; if (visible) run(); }, { rootMargin: "120px 0px" }).observe(stage);
 if (still.matches) touring = false;
-stage.addEventListener("pointermove", (event) => {
+const aim = (event) => {
   const box = svg.getBoundingClientRect();
   const share = clamp(((event.clientX - box.left) / box.width - 0.25) / 0.5, 0, 1);
   steer(REACH[0] + share * (REACH[1] - REACH[0]));
-});
+};
+stage.addEventListener("pointermove", aim);
+stage.addEventListener("pointerdown", aim);
 stage.addEventListener("pointerleave", () => steer(target));
 stage.addEventListener("keydown", (event) => {
   const here = stops.reduce((best, stop, index) => (Math.abs(stop - target) < Math.abs(stops[best] - target) ? index : best), 0);
@@ -261,13 +263,14 @@ const body = k.plateHtml({
   fig: "Fig 1",
   title: "Dial indicator",
   hint: "Hover to slide the carriage",
-  readout: `block 1 · reads ${BLOCKS[0].toFixed(1)} px`,
+  touchHint: "Drag to slide the carriage",
+  readout: `block 1 · reads ${BLOCKS[0].toFixed(1)} mm`,
   keys: [
     { mark: "lit", label: "Plunger and needle: what moves when the height changes" },
-    { mark: "raised", label: "Three gauge blocks, 18, 14 and 10 tall" },
+    { mark: "raised", label: "Three gauge blocks, 18, 14 and 10 mm tall" },
   ],
   caption:
-    "A dial indicator on a surface plate. Slide the carriage and the plunger rides up or down onto the block beneath it; one turn of the needle is 20 px of travel, so every block reads its own height.",
+    "A dial indicator on a surface plate. Slide the carriage and the plunger rides up or down onto the block beneath it; one turn of the needle is 20 mm of travel, in 50 divisions of 0.4 mm, so every block reads its own height.",
   body: `<div class="iso-stage" tabindex="0" role="slider" aria-label="Dial indicator: arrow keys move the carriage from block to block" aria-valuemin="0" aria-valuemax="18" aria-valuenow="18">${svg}</div>`,
 });
 
