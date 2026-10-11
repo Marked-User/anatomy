@@ -1,4 +1,4 @@
-import { writeFileSync } from "node:fs";
+import { readFileSync, writeFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import * as k from "../../kit/iso-kit.mjs";
@@ -6,6 +6,21 @@ import { kitScript } from "../../scripts/inline-kit.mjs";
 
 const HERE = dirname(fileURLToPath(import.meta.url));
 const theme = process.argv.includes("--light") ? "light" : "dark";
+
+const hexagon = (cx, cy, r) => Array.from({ length: 6 }, (_, i) => [+(cx + r * Math.cos(Math.PI / 2 + (i * Math.PI) / 3)).toFixed(3), +(cy + r * Math.sin(Math.PI / 2 + (i * Math.PI) / 3)).toFixed(3)]);
+const MAKERS_MARK = [hexagon(0.63, 0.5, 0.52), hexagon(0.63, 0.5, 0.38), hexagon(0.63, 0.5, 0.15)];
+
+function logoPolygons() {
+  const flag = process.argv.indexOf("--logo");
+  if (flag < 0) return MAKERS_MARK;
+  const file = process.argv[flag + 1];
+  if (!file || file.startsWith("--")) throw new Error("--logo needs a JSON file of polygons");
+  const polygons = JSON.parse(readFileSync(file, "utf8"));
+  const valid = Array.isArray(polygons) && polygons.length > 0 && polygons.every((polygon) => Array.isArray(polygon) && polygon.length >= 3 && polygon.every((point) => Array.isArray(point) && point.length === 2 && point.every(Number.isFinite)));
+  if (!valid) throw new Error("--logo file must be an array of polygons, each an array of at least three [x, y] points");
+  return polygons;
+}
+const LOGO = logoPolygons();
 
 const WIDTH = 600;
 const HEIGHT = 440;
@@ -118,10 +133,7 @@ function screen() {
   const left = -H * 0.61;
   const base = CRT_MID + 2;
   const glyph = (points) => k.pathOf(points.map(([gx, gy]) => [left + gx * H, -(base + gy * H)]), true);
-  const logo =
-    glyph([[0, 0], [0.37, 1], [0.55, 1], [0.92, 0], [0.71, 0], [0.63, 0.23], [0.29, 0.23], [0.21, 0]]) +
-    glyph([[0.35, 0.41], [0.57, 0.41], [0.46, 0.72]]) +
-    glyph([[0.68, 1], [0.89, 1], [1.26, 0], [1.05, 0]]);
+  const logo = LOGO.map(glyph).join("");
   const lines = [];
   for (let z = CRT.z0 + 1.2; z < CRT.z1; z += 1.6) lines.push(`M${CRT.x0} ${(-z).toFixed(1)}H${CRT.x1}`);
   const glow = flat(-30, CRT.z0 + 8, 30, CRT.z1 - 8, 26, 10);
@@ -224,11 +236,11 @@ const svg = k.figureSvg({
   width: WIDTH,
   height: HEIGHT,
   label:
-    "An all-in-one desk computer in the spirit of 1984 on a bench plate: a tall case with a CRT set into its front showing the Anthropic mark and a typing prompt, a floppy slot and speaker grille below, vents and a rocker switch on the side, and a keyboard joined to a side port by a coiled cord.",
+    "An all-in-one desk computer in the spirit of 1984 on a bench plate: a tall case with a CRT set into its front showing a maker's mark and a typing prompt, a floppy slot and speaker grille below, vents and a rocker switch on the side, and a keyboard joined to a side port by a coiled cord.",
   body: [plate(), computer(), keyboard(), cable()],
 });
 
-const PHRASES = ["hello, claude", "what is a crt?", "draw it isometric"];
+const PHRASES = ["hello, world", "what is a crt?", "draw it isometric"];
 
 const live = `
 const P = ${JSON.stringify(P)};
@@ -419,14 +431,15 @@ const body =
     fig: "Fig 2",
     title: "Desk computer",
     hint: "Type on it · click it to switch",
+    touchHint: "Tap keys · tap case for power",
     readout: "on · 0 chars",
     keys: [
-      { mark: "lit", label: "The screen: the Anthropic mark and what you type" },
+      { mark: "lit", label: "The screen: a maker's mark and what you type" },
       { mark: "raised", label: "Fifty-eight keys; each one goes down as it is typed" },
       { mark: "edge", label: "A coiled cord from the keyboard to the side port" },
     ],
     caption:
-      "An all-in-one desk computer in the spirit of 1984: a CRT set into a tall case, a floppy slot and speaker grille under it, vents and a rocker switch on the side. Focus it and type: each key you press goes down on the keyboard and the character lands on the screen beneath the Anthropic mark. Backspace and Return work, Escape or a click on the case switches it off and the picture collapses to a line and a dot, as a CRT does.",
+      "An all-in-one desk computer in the spirit of 1984: a CRT set into a tall case, a floppy slot and speaker grille under it, vents and a rocker switch on the side. Focus it and type: each key you press goes down on the keyboard and the character lands on the screen beneath the maker's mark. Backspace and Return work, Escape or a click on the case switches it off and the picture collapses to a line and a dot, as a CRT does.",
     body: `<div class="iso-stage" tabindex="0" role="group" aria-label="Desk computer. Type to write on its screen; Escape switches the power.">${svg}<span class="pc-sr" role="status" aria-live="polite" data-status></span></div>`,
   });
 
