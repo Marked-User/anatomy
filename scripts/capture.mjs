@@ -1,8 +1,10 @@
 import { spawn } from "node:child_process";
-import { existsSync, mkdtempSync, readdirSync, rmSync, writeFileSync } from "node:fs";
-import { homedir, tmpdir } from "node:os";
+import { mkdtempSync, rmSync, writeFileSync } from "node:fs";
+import { tmpdir } from "node:os";
 import { join, resolve } from "node:path";
 import { pathToFileURL } from "node:url";
+import { findChrome } from "./find-chrome.mjs";
+import { applyPointerMode, pointerMode } from "./pointer-mode.mjs";
 
 if (typeof WebSocket === "undefined" && !process.execArgv.includes("--experimental-websocket")) {
   const child = spawn(process.execPath, ["--experimental-websocket", ...process.argv.slice(1)], { stdio: "inherit" });
@@ -30,7 +32,12 @@ function usage() {
   --times <ms,...>    extra shots at these delays, each measured from the first shot (not from the previous one),
                       saved as name-<ms>.png; a capture takes 60-200 ms, so delays closer than that run late
   --reduced           emulate prefers-reduced-motion: reduce
+  --touch | --mouse   force the touch hint (hover: none, coarse pointer) or the desktop hint; by default a viewport under
+                      600 px wide is a touch screen and a wider one a mouse (headless Chrome reports hover: none everywhere)
   --theme <dark|light>  emulate prefers-color-scheme
+  --fit               one-screen check: prints whether the .iso-figure (card, legend and caption) fits the viewport and whether the
+                      hint and readout corners overlap each other or overflow the .iso-plate; exits 1 if either fails
+                      (phone check: --width 390 --height 844 --fit)
 
 Prints the clip box, console errors, uncaught exceptions and whether the page scrolls sideways.`);
 }
@@ -53,35 +60,15 @@ function parse(argv) {
     else if (arg === "--key") options.keys = next().split(",");
     else if (arg === "--times") options.times = next().split(",").map(Number);
     else if (arg === "--reduced") options.reduced = true;
+    else if (arg === "--fit") options.fit = true;
+    else if (arg === "--touch") options.touch = true;
+    else if (arg === "--mouse") options.mouse = true;
     else if (arg === "--theme") options.theme = next();
     else if (arg === "--help" || arg === "-h") options.help = true;
     else rest.push(arg);
   }
   options.target = rest[0];
   return options;
-}
-
-function chromePath() {
-  const candidates = [
-    process.env.CHROME_PATH,
-    "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome",
-    "/Applications/Chromium.app/Contents/MacOS/Chromium",
-    "/Applications/Google Chrome Canary.app/Contents/MacOS/Google Chrome Canary",
-    "/usr/bin/google-chrome",
-    "/usr/bin/google-chrome-stable",
-    "/usr/bin/chromium",
-    "/usr/bin/chromium-browser",
-    "C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe",
-  ].filter(Boolean);
-  const playwright = join(homedir(), "Library/Caches/ms-playwright");
-  if (existsSync(playwright)) {
-    for (const dir of readdirSync(playwright).sort().reverse()) {
-      for (const sub of ["chrome-mac-arm64/Google Chrome for Testing.app/Contents/MacOS/Google Chrome for Testing", "chrome-mac/Chromium.app/Contents/MacOS/Chromium"]) {
-        candidates.push(join(playwright, dir, sub));
-      }
-    }
-  }
-  return candidates.find((path) => existsSync(path));
 }
 
 async function main() {
@@ -92,9 +79,9 @@ async function main() {
   }
   const url = /^https?:|^file:/.test(options.target) ? options.target : pathToFileURL(resolve(options.target)).href;
   const out = resolve(options.out ?? "capture.png");
-  const binary = chromePath();
+  const binary = findChrome();
   if (!binary) {
-    console.error("No Chrome found. Set CHROME_PATH to a Chrome or Chromium binary.");
+    console.error("No Chrome found. Set CHROME_PATH to a Chrome or Chromium binary, or run node scripts/doctor.mjs.");
     process.exit(1);
   }
   const profile = mkdtempSync(join(tmpdir(), "iso-capture-"));
@@ -162,6 +149,7 @@ async function main() {
     if (options.reduced) features.push({ name: "prefers-reduced-motion", value: "reduce" });
     if (options.theme) features.push({ name: "prefers-color-scheme", value: options.theme });
     if (features.length) await send("Emulation.setEmulatedMedia", { features });
+    await applyPointerMode(send, pointerMode(options, options.width));
     await send("Emulation.setDeviceMetricsOverride", { width: options.width, height: options.height, deviceScaleFactor: options.scale, mobile: options.width < 600 });
     await send("Page.navigate", { url });
     await sleep(Math.min(options.wait, 1500));
@@ -221,9 +209,33 @@ async function main() {
     console.log(`saved ${out}`);
     console.log(`clip ${Math.round(box.x)},${Math.round(box.y)} ${Math.round(box.w)}x${Math.round(box.h)} · readout "${readout}" · scrolls sideways: ${sideways ? "YES" : "no"}`);
     if (readouts.length) console.log(`readout over time: ${readouts.join(" · ")}`);
+    let fitFailed = false;
+    if (options.fit) {
+      const fit = await evaluate(`(()=>{const box=(el)=>{if(!el)return null;const r=el.getBoundingClientRect();return {x:Math.round(r.left),y:Math.round(r.top),w:Math.round(r.width),h:Math.round(r.height)}};const figure=document.querySelector(".iso-figure")||document.querySelector(".iso-plate");return {figure:box(figure),plate:box(document.querySelector(".iso-plate")),hint:box(document.querySelector('[data-corner="hint"]')),readout:box(document.querySelector('[data-corner="readout"]')),vw:innerWidth,vh:innerHeight}})()`);
+      const text = (b) => `${b.x},${b.y} ${b.w}x${b.h}`;
+      if (!fit.figure) {
+        console.log("fits one screen: NO (no .iso-figure or .iso-plate found)");
+        fitFailed = true;
+      } else {
+        const fits = fit.figure.h <= fit.vh && fit.figure.w <= fit.vw;
+        console.log(`fits one screen: ${fits ? "yes" : "NO"} (figure ${fit.figure.h} px of ${fit.vh} px viewport${fit.figure.w > fit.vw ? `, ${fit.figure.w} px wide of ${fit.vw} px` : ""})`);
+        if (!fits) fitFailed = true;
+      }
+      const inside = (b, p) => b.x >= p.x - 1 && b.y >= p.y - 1 && b.x + b.w <= p.x + p.w + 1 && b.y + b.h <= p.y + p.h + 1;
+      const overlap = fit.hint && fit.readout && fit.hint.x < fit.readout.x + fit.readout.w && fit.readout.x < fit.hint.x + fit.hint.w && fit.hint.y < fit.readout.y + fit.readout.h && fit.readout.y < fit.hint.y + fit.hint.h;
+      const overflow = fit.plate && [["hint", fit.hint], ["readout", fit.readout]].filter(([, b]) => b && !inside(b, fit.plate));
+      const boxes = `hint ${fit.hint ? text(fit.hint) : "none"} · readout ${fit.readout ? text(fit.readout) : "none"} · plate ${fit.plate ? text(fit.plate) : "none"}`;
+      if (overlap) {
+        console.log(`corners: OVERLAP (${boxes})`);
+        fitFailed = true;
+      } else if (overflow && overflow.length) {
+        console.log(`corners: OVERFLOW ${overflow.map(([name]) => name).join(", ")} (${boxes})`);
+        fitFailed = true;
+      } else console.log("corners: ok");
+    }
     console.log(problems.length ? problems.join("\n") : "console: clean");
     socket.close();
-    finish(0);
+    finish(fitFailed ? 1 : 0);
   } catch (error) {
     console.error(error);
     finish(1);

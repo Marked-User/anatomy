@@ -1,8 +1,10 @@
 import { spawn } from "node:child_process";
-import { existsSync, mkdirSync, mkdtempSync, readdirSync, readFileSync, rmSync, writeFileSync } from "node:fs";
-import { homedir, tmpdir } from "node:os";
+import { mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs";
+import { tmpdir } from "node:os";
 import { dirname, join, resolve } from "node:path";
 import { pathToFileURL } from "node:url";
+import { findChrome } from "./find-chrome.mjs";
+import { applyPointerMode, pointerMode } from "./pointer-mode.mjs";
 import { LINE_ENDS } from "./line-ends.mjs";
 
 if (typeof WebSocket === "undefined" && !process.execArgv.includes("--experimental-websocket")) {
@@ -15,12 +17,14 @@ if (typeof WebSocket === "undefined" && !process.execArgv.includes("--experiment
 function usage() {
   console.log(`Drive a figure in headless Chrome: move, click, type, wait, screenshot, and build contact sheets.
 
-  node drive.mjs <file.html | url> '<actions as JSON>' [--width 1440] [--height 1100] [--scale 1] [--reduced] [--theme dark|light] [--no-webgl] [--preload file.js]
+  node drive.mjs <file.html | url> '<actions as JSON>' [--width 1440] [--height 1100] [--scale 1] [--reduced] [--theme dark|light] [--no-webgl] [--preload file.js] [--touch | --mouse]
   node drive.mjs <file.html | url> --actions steps.json
 
   --reduced     emulate prefers-reduced-motion: reduce
   --theme t     emulate prefers-color-scheme: dark or light (only pages that read the media query follow it)
   --no-webgl    make canvas.getContext("webgl"/"webgl2") return null, to check the SVG fallback
+  --touch|--mouse  force the touch hint (hover: none, coarse pointer) or the desktop hint; by default a viewport under 600 px
+                wide is a touch screen and a wider one a mouse (headless Chrome reports hover: none everywhere)
   --preload js  run a script before the page's own scripts (counters, stubs, hooks)
   Kit pages set their theme at build time (body data-theme), so drive the -light.html build for light.
   Put anything with eval strings in an --actions file: inline JSON quoting breaks easily.
@@ -58,28 +62,6 @@ Fractions are 0..1 across the element.
 Prints the readout after each shot, then console errors and exceptions.`);
 }
 
-function chromePath() {
-  const candidates = [
-    process.env.CHROME_PATH,
-    "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome",
-    "/Applications/Chromium.app/Contents/MacOS/Chromium",
-    "/usr/bin/google-chrome",
-    "/usr/bin/google-chrome-stable",
-    "/usr/bin/chromium",
-    "/usr/bin/chromium-browser",
-    "C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe",
-  ].filter(Boolean);
-  const playwright = join(homedir(), "Library/Caches/ms-playwright");
-  if (existsSync(playwright)) {
-    for (const dir of readdirSync(playwright).sort().reverse()) {
-      for (const sub of ["chrome-mac-arm64/Google Chrome for Testing.app/Contents/MacOS/Google Chrome for Testing", "chrome-mac/Chromium.app/Contents/MacOS/Chromium", "chrome-linux/chrome"]) {
-        candidates.push(join(playwright, dir, sub));
-      }
-    }
-  }
-  return candidates.find((path) => existsSync(path));
-}
-
 async function main() {
   const argv = process.argv.slice(2);
   if (!argv.length || argv.includes("--help") || argv.includes("-h")) {
@@ -96,6 +78,8 @@ async function main() {
     else if (arg === "--reduced") options.reduced = true;
     else if (arg === "--theme") options.theme = argv[++index];
     else if (arg === "--no-webgl") options.noWebgl = true;
+    else if (arg === "--touch") options.touch = true;
+    else if (arg === "--mouse") options.mouse = true;
     else if (arg === "--preload") options.preload = readFileSync(argv[++index], "utf8");
     else if (arg === "--actions") options.actions = JSON.parse(readFileSync(argv[++index], "utf8"));
     else rest.push(arg);
@@ -103,9 +87,9 @@ async function main() {
   const [target, script] = rest;
   const actions = options.actions ?? JSON.parse(script ?? "[]");
   const url = /^https?:|^file:/.test(target) ? target : pathToFileURL(resolve(target)).href;
-  const binary = chromePath();
+  const binary = findChrome();
   if (!binary) {
-    console.error("No Chrome found. Set CHROME_PATH to a Chrome or Chromium binary.");
+    console.error("No Chrome found. Set CHROME_PATH to a Chrome or Chromium binary, or run node scripts/doctor.mjs.");
     process.exit(1);
   }
   const profile = mkdtempSync(join(tmpdir(), "iso-drive-"));
@@ -166,6 +150,7 @@ async function main() {
     const NO_GL = `(()=>{const get=HTMLCanvasElement.prototype.getContext;HTMLCanvasElement.prototype.getContext=function(kind,...rest){if(/webgl/.test(String(kind)))return null;return get.call(this,kind,...rest)}})();`;
     const early = [SLOW, options.noWebgl ? NO_GL : "", options.preload ?? ""].filter(Boolean).join("\n");
     await send("Page.addScriptToEvaluateOnNewDocument", { source: early });
+    await applyPointerMode(send, pointerMode(options, options.width));
     await send("Emulation.setDeviceMetricsOverride", { width: options.width, height: options.height, deviceScaleFactor: options.scale, mobile: options.width < 600 });
     await send("Page.navigate", { url });
     await sleep(1200);

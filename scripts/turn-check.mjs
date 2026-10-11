@@ -1,8 +1,9 @@
 import { spawn } from "node:child_process";
-import { existsSync, mkdirSync, mkdtempSync, readdirSync, readFileSync, rmSync, writeFileSync } from "node:fs";
-import { homedir, tmpdir } from "node:os";
+import { mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs";
+import { tmpdir } from "node:os";
 import { dirname, join, resolve } from "node:path";
 import { pathToFileURL } from "node:url";
+import { findChrome } from "./find-chrome.mjs";
 import { LINE_ENDS } from "./line-ends.mjs";
 
 function usage() {
@@ -26,16 +27,14 @@ function usage() {
   The angle is the figure's first turn group (window.__isoTurn.set(θ)).`);
 }
 
-function chromePath() {
-  const candidates = [process.env.CHROME_PATH, "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome", "/Applications/Chromium.app/Contents/MacOS/Chromium", "/usr/bin/google-chrome", "/usr/bin/google-chrome-stable", "/usr/bin/chromium", "/usr/bin/chromium-browser"].filter(Boolean);
-  const playwright = join(homedir(), "Library/Caches/ms-playwright");
-  if (existsSync(playwright)) for (const dir of readdirSync(playwright).sort().reverse()) for (const sub of ["chrome-mac-arm64/Google Chrome for Testing.app/Contents/MacOS/Google Chrome for Testing", "chrome-mac/Chromium.app/Contents/MacOS/Chromium", "chrome-linux/chrome"]) candidates.push(join(playwright, dir, sub));
-  return candidates.find((path) => existsSync(path));
-}
-
 async function browser(target, { width, height, scale, throttle, noWebgl }) {
   const profile = mkdtempSync(join(tmpdir(), "turn-check-"));
-  const chrome = spawn(chromePath(), ["--headless=new", "--remote-debugging-port=0", `--user-data-dir=${profile}`, "--no-first-run", "--no-default-browser-check", "--hide-scrollbars", "--allow-file-access-from-files", "--enable-unsafe-swiftshader", "--ignore-gpu-blocklist", "about:blank"]);
+  const binary = findChrome();
+  if (!binary) {
+    console.error("No Chrome found. Set CHROME_PATH to a Chrome or Chromium binary, or run node scripts/doctor.mjs.");
+    process.exit(1);
+  }
+  const chrome = spawn(binary, ["--headless=new", "--remote-debugging-port=0", `--user-data-dir=${profile}`, "--no-first-run", "--no-default-browser-check", "--hide-scrollbars", "--allow-file-access-from-files", "--enable-unsafe-swiftshader", "--ignore-gpu-blocklist", "about:blank"]);
   const port = await new Promise((done, fail) => {
     let text = "";
     const timer = setTimeout(() => fail(new Error("Chrome did not start")), 20000);
