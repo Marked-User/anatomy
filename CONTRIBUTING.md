@@ -13,7 +13,7 @@ You need:
 - **Claude Code**, to try the skill itself.
 
 ```sh
-git clone https://github.com/wheresryan22/anatomy.git
+git clone https://github.com/Marked-User/anatomy.git
 cd anatomy
 ```
 

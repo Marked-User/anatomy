@@ -7,13 +7,13 @@
   <a href="LICENSE"><img src="https://img.shields.io/badge/license-MIT-1b1b19?style=flat-square" alt="MIT license"></a>
   <a href="#requirements"><img src="https://img.shields.io/badge/node-%E2%89%A5%2020.10-1b1b19?style=flat-square&logo=nodedotjs&logoColor=white" alt="Node 20.10 or later"></a>
   <a href="#requirements"><img src="https://img.shields.io/badge/dependencies-0-1b1b19?style=flat-square" alt="No dependencies"></a>
-  <a href="https://github.com/wheresryan22/anatomy/actions/workflows/ci.yml"><img src="https://github.com/wheresryan22/anatomy/actions/workflows/ci.yml/badge.svg" alt="CI"></a>
+  <a href="https://github.com/Marked-User/anatomy/actions/workflows/ci.yml"><img src="https://github.com/Marked-User/anatomy/actions/workflows/ci.yml/badge.svg" alt="CI"></a>
 </p>
 
 <p align="center">
   <a href="https://skills.wheresryan.sh/anatomy"><img src="https://img.shields.io/badge/Website-skills.wheresryan.sh%2Fanatomy-1b1b19?style=for-the-badge" alt="Website: skills.wheresryan.sh/anatomy"></a>
   &nbsp;
-  <a href="https://github.com/wheresryan22/anatomy/archive/refs/heads/main.zip"><img src="https://img.shields.io/badge/Download-ZIP-1b1b19?style=for-the-badge&logo=github&logoColor=white" alt="Download ZIP"></a>
+  <a href="https://github.com/Marked-User/anatomy/archive/refs/heads/main.zip"><img src="https://img.shields.io/badge/Download-ZIP-1b1b19?style=for-the-badge&logo=github&logoColor=white" alt="Download ZIP"></a>
   &nbsp;
   <a href="#install"><img src="https://img.shields.io/badge/Install-npx_skills_add-d7d7d0?style=for-the-badge&labelColor=1b1b19&logo=npm&logoColor=white" alt="Install with npx"></a>
 </p>
@@ -44,7 +44,7 @@ Then the agent builds that thing out of dozens of small, solid, shaded parts, pu
 ## Quick start
 
 ```sh
-npx skills add wheresryan22/anatomy -g
+npx skills add Marked-User/anatomy -g
 ```
 
 The CLI asks which agents to set up. Then, in your agent:
@@ -96,10 +96,10 @@ Anatomy is a standard [Agent Skill](https://agentskills.io): a folder with a `SK
 
 | | Command | Installs to |
 |---|---|---|
-| **skills CLI**, for you | `npx skills add wheresryan22/anatomy -g` (add `-a <agent>` to pick one) | the chosen agent's user skills folder, for example `~/.claude/skills/anatomy` |
-| **skills CLI**, for one project | `npx skills add wheresryan22/anatomy` | the chosen agent's project skills folder, for example `.claude/skills/anatomy` |
-| **git**, for you | `git clone https://github.com/wheresryan22/anatomy.git ~/.claude/skills/anatomy` | `~/.claude/skills/anatomy` |
-| **git**, for one project | `git clone https://github.com/wheresryan22/anatomy.git .claude/skills/anatomy` | `.claude/skills/anatomy` |
+| **skills CLI**, for you | `npx skills add Marked-User/anatomy -g` (add `-a <agent>` to pick one) | the chosen agent's user skills folder, for example `~/.claude/skills/anatomy` |
+| **skills CLI**, for one project | `npx skills add Marked-User/anatomy` | the chosen agent's project skills folder, for example `.claude/skills/anatomy` |
+| **git**, for you | `git clone https://github.com/Marked-User/anatomy.git ~/.claude/skills/anatomy` | `~/.claude/skills/anatomy` |
+| **git**, for one project | `git clone https://github.com/Marked-User/anatomy.git .claude/skills/anatomy` | `.claude/skills/anatomy` |
 | **Download**, no git | see below | `~/.claude/skills/anatomy` |
 
 <details>
@@ -127,12 +127,12 @@ Clone the repository into your agent's skills folder (for Claude Code, one of th
 
 <br>
 
-[Download the ZIP](https://github.com/wheresryan22/anatomy/archive/refs/heads/main.zip), unpack it, rename the folder from `anatomy-main` to `anatomy`, and move it into `~/.claude/skills/`.
+[Download the ZIP](https://github.com/Marked-User/anatomy/archive/refs/heads/main.zip), unpack it, rename the folder from `anatomy-main` to `anatomy`, and move it into `~/.claude/skills/`.
 
 Or in one line on macOS or Linux:
 
 ```sh
-mkdir -p ~/.claude/skills/anatomy && curl -L https://github.com/wheresryan22/anatomy/archive/refs/heads/main.tar.gz | tar -xz --strip-components=1 -C ~/.claude/skills/anatomy
+mkdir -p ~/.claude/skills/anatomy && curl -L https://github.com/Marked-User/anatomy/archive/refs/heads/main.tar.gz | tar -xz --strip-components=1 -C ~/.claude/skills/anatomy
 ```
 
 </details>
