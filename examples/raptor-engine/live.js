@@ -894,11 +894,6 @@ stage.addEventListener("keydown", (event) => {
 });
 
 if (still.matches) touring = false;
-const narrow = matchMedia("(hover: none), (max-width: 480px)");
-const hint = root.querySelector(".rp-hint");
-const wording = () => hint && (hint.textContent = narrow.matches ? "Tap to take apart" : "Hover the engine to take it apart");
-wording();
-narrow.addEventListener("change", wording);
 window.addEventListener("resize", () => {
   lastKey = "";
   run();
