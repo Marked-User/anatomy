@@ -4,6 +4,26 @@ How to put a shader effect (fire, water, light, glow) inside an isometric figure
 
 The user loved the first shader figure, but noticed that the colour changed instantly between its phases, as if the effect had been cut. So the bar is: **nothing pops, nothing is cut, and everything sits in the drawing's perspective.** Every rule below came from a bug that broke that bar.
 
+## 0. Core rules
+
+Read this whole file before writing any shader. These are the core rules, also in short:
+
+Use a shader only for what lines can't draw: fire and exhaust, water and caustics, real lamp light, glow, steam. The parts stay SVG. The core rules come from the first shader figure, whose colour change between phases looked cut rather than crossfaded:
+
+- **Three layers.** A back SVG holds what the effect covers, the canvas holds the effect (`pointer-events: none`), and a front SVG holds what covers it. Split a part, or the effect, when it is on both sides.
+- **World space, same camera.** Build every shader point from `onFloor`, `onWallX` and `onWallY`, or march the pixel's ray `rayOf(vb) + t·towardViewer()`. Size everything in world units times `uK`. Anything lying on a plane registers exactly with that plane's SVG lines.
+- **Nothing pops.** Every uniform follows an envelope with an attack and a decay (the kit's `burst` for events, `settle` for levels). Phase changes are crossfades where colour shifts continuously with the physical quantity, and a fade-out only gets darker.
+- **No hard cut-offs.** Every term reaches zero before any `if`, bound or canvas edge, and before any cell edge of a cell noise.
+- **Seen through an opening, masked twice.** Content behind a window or a recess is masked in its own plane and by the opening in the face plane, multiplied (`references/webgl.md`, section 5).
+- **Blending.** Use `tonemap()` and dither. In dark, a canvas that only adds light uses premultiplied output with `mix-blend-mode: screen`, and one that must also darken (the ripple tank's water) stays normal-blended.
+- **Light theme ships, and its shaders are designed for paper.** Use normal premultiplied alpha, never screen. Write the colour the paper should show and solve for the ink. A glow is a saturated body with a pale core, a coloured rim and an alpha floor, never a darkened dark-theme colour: that gave the Raptor's "red ink smoke".
+  - What the light falls on takes a tint, and the cavity that holds it gets a darker physical ground (soot, refractory, water depth).
+  - Hot bodies follow one blackbody ink table shared with the fallback.
+  - Ink only grows with light: fade the finished ink once, never one term at a time.
+  - Ink ends at each stroke's inner edge.
+  - Measure ink per frame. `references/webgl.md`, section 8, has the recipes and the faults reviewers found.
+- **Restraint.** Cap the device ratio at 1.5 and render only while the effect is active and onscreen. Reduced motion gets one still frame, and the SVG must still read without WebGL.
+
 ## Contents
 1. When a shader earns its place
 2. The layer stack
