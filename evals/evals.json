@@ -30,6 +30,27 @@
       "prompt": "For an article on how espresso machines work, make an interactive isometric figure of a heat-exchanger espresso machine with the side panel off: boiler, heat-exchanger tube, group head, pump, steam wand, pressure gauge and all the pipework between them. Show water flowing through when you pull a shot. Lots of fine detail, it should hold up when people zoom in. Standalone HTML, light theme.",
       "expected_output": "A single standalone light HTML page built with the kit: a real espresso machine with its side panel off, its boiler, group head, gauge and fittings turned with kit/lathe.mjs and its pipework from kit/tube.mjs, with a live readout from a small model (boiler pressure, brew temperature, flow) and a calm pull-a-shot interaction. Every pipe is routed from real ports along the structure (leaving each port on its normal, running parallel to the boiler or round it at a fixed radius, crossing other lines only on straights and well apart in depth), never across the front of the boiler or group; it ends on a flange, union nut or fitting on a real port, never in the air. Nothing is sunk into anything: flanges sit flush or on saddle pads on the curved boiler, branches leave from ball tees, valves sit on straight runs, and every collar, clamp, band or valve gaps the pipe it wraps. Every item records its shape in A.recorder, A.settle sets the painter's keys, and `node build.mjs --audit` ends `audit passed`, zero on every failing line, with no interlock hidden by a key bias. The boiler, group head dome and gauge are smooth-shaded with no tone staircase or scalloped bands (analytic profiles with smooth.slope or bandsOf for the boiler), seams sit under the outline, and every bolt circle, rib row or rule line ends on a real edge or fades out (dotsOf/ribsOf with fade, fadeLineSvg). Pipe stripes run onto their end caps with no hairline at chunk joints. The response shows that 4x close-ups of every junction (each tee, flange, union, valve, clamp and crossing) and every curved body were taken in both themes and read, and that the water-flow motion has no pop.",
       "files": []
+    },
+    {
+      "id": 6,
+      "prompt": "For an intro accounting course, I want one interactive isometric figure that makes students see why every journal entry has equal debits and credits. Use a tiny business's first month: the owner invests $5,000 cash (Dr Cash, Cr Owner's equity), buys $1,200 of equipment on account (Dr Equipment, Cr Accounts payable), makes an $800 cash sale (Dr Cash, Cr Service revenue) and pays the supplier $500 (Dr Accounts payable, Cr Cash). One standalone HTML file, light theme, it should look like a crafted instrument, not a T-account diagram.",
+      "expected_output": "A single standalone light HTML page built with the kit in the dial-indicator style (or a copy of examples/balance-ledger adapted to the prompt): double-entry bookkeeping as a beam balance with a debit pan and a credit pan, many small solid parts (base on feet, housing, pans on rods, a pointer over a scale with a zero mark, weights sized by dollars), one lit accent (the pointer). A small model drives everything: each entry adds the same dollar amount to both sides, the beam tips toward the debit side while only the debit is posted and comes back to level once the credit lands, and the readout is in dollars with thousands separators (for example Dr $6,200 = Cr $6,200, or out $800 while half posted), ending at Dr $7,500 = Cr $7,500. The figureSvg label (alt text) names the concept and the object in plain words, and the caption is true to the numbers. Pointer, touch and keyboard steps, an idle tour, still under reduced motion. The quick verification tier was run and read: one desktop shot, one phone shot at 390 x 844 with --fit (corners ok), and scripts/lines.mjs printing line ends: 0, plus a 4x sweep over the pans and the scale.",
+      "files": [],
+      "should_trigger": true
+    },
+    {
+      "id": 7,
+      "prompt": "make a bar chart of our monthly signups for Q3 (Jul 1,240, Aug 1,610, Sep 1,980) for a slide",
+      "expected_output": "The anatomy skill does not load: this is a data chart, and the skill is not a chart library. A plain bar chart (for example matplotlib, Vega-Lite or an SVG with axes and labelled bars) is the right answer, with no isometric object.",
+      "files": [],
+      "should_trigger": false
+    },
+    {
+      "id": 8,
+      "prompt": "make a tweet thumbnail for my blog post about rate limiting, 1600x900, bold title text",
+      "expected_output": "The anatomy skill does not load: a social card or thumbnail is a layout and typography job, not an explanatory mechanical figure. The answer is a simple 1600 x 900 image or HTML/SVG card with the title. If the user already has an anatomy figure, scripts/export.mjs --preset x-wide can be mentioned, but no new figure is built.",
+      "files": [],
+      "should_trigger": false
     }
   ]
 }

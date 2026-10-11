@@ -30,6 +30,11 @@ jobs:
           node examples/dial-indicator/build.mjs
           node examples/dial-indicator/build.mjs --light
 
+      - name: Balance ledger
+        run: |
+          node examples/balance-ledger/build.mjs
+          node examples/balance-ledger/build.mjs --light
+
       - name: Desk computer
         run: |
           node examples/desk-computer/build.mjs
@@ -56,6 +61,12 @@ jobs:
         run: |
           node examples/raptor-engine/build.mjs
           node examples/raptor-engine/build.mjs --light
+
+      - name: Prose lint
+        run: node scripts/lint-prose.mjs
+
+      - name: Doctor
+        run: node scripts/doctor.mjs || true
 
       - name: Committed pages are unchanged
         run: |

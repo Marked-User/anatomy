@@ -12,7 +12,7 @@ body:
     attributes:
       label: Where is the problem?
       options:
-        - A figure Claude made with the skill
+        - A figure an agent made with the skill
         - One of the examples
         - The kit (kit/)
         - A check script (scripts/)
@@ -64,7 +64,7 @@ body:
     id: steps
     attributes:
       label: How to reproduce
-      description: The prompt you gave Claude, or the exact command you ran.
+      description: The prompt you gave your agent, or the exact command you ran.
       placeholder: |
         /anatomy explain how a token bucket rate limiter works, interactive
         node examples/raptor-engine/build.mjs --audit
@@ -80,8 +80,8 @@ body:
     id: environment
     attributes:
       label: Environment
-      description: Node.js version, operating system, Chrome version, Claude Code version.
-      placeholder: output of `node --version` and `claude --version`, your OS, your Chrome version
+      description: Node.js version, operating system, Chrome version, and the agent you use with its version.
+      placeholder: output of `node --version` and `node scripts/doctor.mjs`, your agent and its version, your OS, your Chrome version
     validations:
       required: true
   - type: textarea
