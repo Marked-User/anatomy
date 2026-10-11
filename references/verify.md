@@ -2,6 +2,46 @@
 
 Look at the figure the way a demanding reviewer would, before anyone else does. Rendering it is cheap, and guessing is expensive.
 
+## Tiers
+
+There are two tiers. Pick one from the figure's size (SKILL.md, workflow step 1) and from what the figure contains.
+
+| Tier | What it runs | When it is enough |
+|---|---|---|
+| **Quick** | One desktop shot, one phone shot with the one-screen check, the line check at 0, and reading every PNG. | At every milestone of every size, and as the final check of a Figure with no pipes, cables, turned parts, shader or 3D. |
+| **Full** | Everything in "Full tier" below and the review checklist. | The final check of a Hero or an Epic, and of any figure with pipes, cables, turned parts (`kit/lathe.mjs`), a shader or the 3D mode. |
+
+The quick tier, for a page `page.html`:
+
+```sh
+node scripts/capture.mjs page.html --out shots/desk.png
+node scripts/capture.mjs page.html --out shots/phone.png --width 390 --height 844 --fit
+node scripts/lines.mjs page.html --out shots/lines.png
+```
+
+Then open both PNGs and look. A Figure on the quick tier still gets its 4× detail sweep over the subject and the mechanism (SKILL.md, "Every creation is highly detailed"). Before you start, `node scripts/doctor.mjs` checks Node, Chrome and ffmpeg and prints one fix for each missing item.
+
+### Full tier
+
+The owner finds faults by zooming in, so you zoom in first. Read every PNG you make.
+
+- Capture desktop, phone (390 wide), hover and several moments of motion with `scripts/capture.mjs`; use `scripts/drive.mjs` for sequences, the apart pose and the `--no-webgl` fallback.
+- **Run the audit to zero.** With pipes, cables or round parts, `node build.mjs --audit` must end `audit passed`, every failing line at 0: clearance at rest, apart and in mid-flight, terminals, loose ends, folds, self-overlap, crowding (against slender solids too), stand-in shapes, support, wobble, saddles and depth order. Fix an interlock in the geometry, never with a key bias.
+- **Run the line check to zero.** The audit never sees line markup. `node scripts/lines.mjs page.html --out shots/lines.png` (and on the `-light` page, and in every resting pose with `drive.mjs`'s `["lines"]` action) must print `line ends: 0`: every seam, rule, rib, tick and pointer ends on a stroke, a dot or an outline. Read the ringed PNG.
+- **4× close-ups of every junction in both themes** (build `--light` too), assembled and apart: every flange, tee, elbow, clamp, valve, bellows, band, saddle, ball joint and crossing, every curved body (no tone staircase), every place a texture ends (on an edge or fading), flat box faces with their seams, every textured hose at a chunk joint, every sliding rod at rest and at full stroke, and every window with text or shader content in it.
+- **Shaders:** a contact sheet slowed with `["slow", 0.05]` across every transition; nothing pops, no colour switch, edges read 0. In light, also log ink per frame through each transition (it must follow the light monotonically) and crop where the ink meets strokes at 8–16× (`references/verify.md`, "Light-theme shaders").
+- Put your PNG next to the examples and ask: is it instantly a real object, rich in small parts with volume, with every line ending on something? Is it highly detailed at 1× and still rewarding at 4×, with no bare face or empty corner? Iterate until yes. Checklist: `references/verify.md`.
+
+### Phone: one screen
+
+At 390 × 844 the whole figure (the card, its legend and its caption) should fit on one screen, and the hint and the readout must each sit on one line inside the card without overlapping each other or the drawing. `capture.mjs --fit` measures both, prints `fits one screen: yes` or `NO` and `corners: ok`, and exits 1 on a failure (`scripts/run-evals.mjs` reports a figure taller than the screen as a warning and overlapping corners as a failure). When it fails, shorten the caption, the hint or the readout before you shrink the drawing.
+
+Touch screens have no hover. Give `plateHtml` a `touchHint` next to `hint` ("Drag to slide the carriage", "Tap it to switch on and off"); the kit shows it instead of the hint under `(hover: none)`. The touch hint must be true: if the figure steers by pointer position, check that a drag on a touch screen reaches it.
+
+### Accessibility
+
+The figure's `figureSvg({ label })` is its alt text: one or two plain sentences that name the concept and the object ("Double-entry bookkeeping shown as a beam balance: ..."), true to the drawing. The caption says the same in reader's terms. Readouts are in real-world units (mm, dollars, requests per second, bar) or plain words ("between blocks", "balanced"), never px or a raw internal value. `scripts/export.mjs` copies the alt text into a `.alt.txt` and a `.json` sidecar beside every exported image.
+
 ## Capture
 `scripts/capture.mjs` starts its own headless Chrome (set `CHROME_PATH` if it can't find one), loads a file or URL, and clips to `.iso-plate` by default. It also prints the readout, any console errors or exceptions, and whether the page scrolls sideways.
 
